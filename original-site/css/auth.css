@@ -1,0 +1,26 @@
+/* Respect the HTML hidden attribute even when component styles set display. */
+[hidden]{display:none !important}
+/* Авторизация */
+.auth-overlay{position:fixed;inset:0;z-index:9999;background:rgba(10,12,10,.78);display:flex;align-items:center;justify-content:center;padding:18px}
+.auth-overlay[hidden]{display:none}
+.auth-dialog{position:relative;width:min(100%,440px);background:#f3eee2;color:#252820;border:1px solid #a8843f;border-radius:14px;padding:28px;box-shadow:0 20px 70px #0008}
+.auth-dialog h2{margin:0 0 8px;font-family:'Old Standard TT',serif}
+.auth-subtitle,.auth-footnote{font-size:.92rem;color:#67675c}
+.auth-close{position:absolute;right:12px;top:8px;border:0;background:none;font-size:30px;cursor:pointer;color:#252820}
+.auth-tabs{display:flex;gap:8px;margin:18px 0}
+.auth-tabs button{flex:1;padding:10px;border:1px solid #a8843f;background:transparent;border-radius:6px;cursor:pointer}
+.auth-tabs button.active,.auth-submit{background:#1f2d27;color:#fff}
+#auth-form{display:grid;gap:8px}
+#auth-form input{padding:12px;border:1px solid #b8ad96;border-radius:6px;background:#fff;font:inherit}
+.auth-submit{padding:12px;border:0;border-radius:6px;font:inherit;cursor:pointer;margin-top:8px}
+.auth-message{min-height:1.1em;font-size:.9rem;color:#7a2e2a;margin:4px 0}
+.auth-footnote{margin-bottom:0}
+#admin-link[hidden],#auth-logout[hidden]{display:none}
+@media(max-width:650px){.header-actions{display:flex;flex-wrap:wrap;gap:6px}.header-actions .btn-phone{margin-left:0!important;font-size:.8rem;padding:8px}}
+
+/* Переключатель видимости пароля */
+.password-field{position:relative;display:flex;align-items:stretch}
+.password-field input{width:100%;min-width:0;padding-right:94px!important}
+.password-toggle{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border:0;background:transparent;color:#48564b;padding:7px;border-radius:5px;font:inherit;font-size:1.05rem;cursor:pointer}
+.password-toggle:hover{background:#e8e1d2}
+.password-toggle:focus-visible{outline:2px solid #a8843f;outline-offset:1px}

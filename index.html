@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Старинная Коллекция — Антиквариат и редкости XIX-XX веков. Уникальные предметы старины с историей.">
+    <title>Старинная Коллекция — Антиквариат и редкости</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#3B2A21">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>Старинная Коллекция</h1>
+                    <p class="logo-tagline">Антиквариат и редкости</p>
+                </div>
+                <nav class="main-nav" aria-label="Основная навигация">
+                    <ul>
+                        <li><a href="#catalog" class="nav-link active">Каталог</a></li>
+                        <li><a href="#about" class="nav-link">О нас</a></li>
+                        <li><a href="#contacts" class="nav-link">Контакты</a></li>
+                        <li>
+                            <a href="#cart" class="nav-link cart-btn" id="cart-btn" aria-label="Корзина">
+                                <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+                                <span>Корзина</span>
+                                <span class="cart-count" id="cart-count" aria-live="polite">0</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section" id="hero" aria-labelledby="hero-title">
+            <div class="hero-canvas">
+                <div class="hero-spotlight"></div>
+                <div class="hero-object" id="hero-object">
+                     <img id="hero-object-img"
+     src="images/hero.png"
+     alt="Антикварный предмет"
+     class="hero-object-img"
+     loading="eager"
+     onerror="this.onerror=null;this.style.display='none';document.getElementById('hero-object-fallback').style.display='flex'">
+<div id="hero-object-fallback" class="hero-object-fallback" style="display:none">
+    <i class="fas fa-lightbulb"></i>
+</div>
+                    <div class="hero-object-glow"></div>
+                </div>
+            </div>
+            <div class="hero-vignette"></div>
+            <div class="container hero-content">
+                <button class="hero-skip" id="hero-skip" aria-label="Перейти к каталогу">
+                    <span>Перейти</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <h1 id="hero-title" class="hero-title">
+                    <span class="hero-title-line">Старинная</span>
+                    <span class="hero-title-line">Коллекция</span>
+                </h1>
+                <p class="hero-subtitle">Уникальные предметы старины от 18 до 20 века</p>
+                <p class="hero-description">Каждый предмет — история, замершая в металле, фарфоре и дереве. Изучите нашу коллекцию.</p>
+                <a href="#catalog" class="btn-primary btn-large hero-cta">Посмотреть коллекцию</a>
+                <div class="hero-scroll-hint" aria-hidden="true">
+                    <span>Листайте вниз</span>
+                    <div class="hero-scroll-line"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="catalog-section" id="catalog" aria-labelledby="catalog-title">
+            <div class="container">
+                <header class="catalog-header">
+                    <h2 id="catalog-title" class="catalog-title">Каталог товаров</h2>
+                    <p class="catalog-description">
+                        Изучите нашу тщательно отобранную коллекцию уникальных предметов старины,
+                        каждый из которых хранит память о минувших эпохах.
+                    </p>
+                </header>
+
+                <div class="search-sort-bar" role="search" aria-label="Поиск и сортировка товаров">
+                    <div class="search-box">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input
+                            type="search"
+                            id="search-input"
+                            class="search-input"
+                            placeholder="Поиск по названию..."
+                            aria-label="Поиск по названию товара"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="sort-options">
+                        <label for="sort-select" class="visually-hidden">Сортировка</label>
+                        <select id="sort-select" class="sort-select" aria-label="Сортировка товаров">
+                            <option value="default">Сортировка</option>
+                            <option value="price-asc">Цена: по возрастанию</option>
+                            <option value="price-desc">Цена: по убыванию</option>
+                            <option value="new-first">Новинки</option>
+                        </select>
+                        <button
+                            class="btn-reset"
+                            id="reset-filters-btn"
+                            onclick="resetFilters()"
+                            aria-label="Сбросить все фильтры"
+                            style="display: none;"
+                        >
+                            Сброс
+                        </button>
+                    </div>
+                </div>
+
+                <div class="category-filters" id="category-filters" role="group" aria-label="Фильтры по категориям">
+                    <button
+                        class="category-btn active"
+                        data-category="all"
+                        aria-pressed="true"
+                    >
+                        Все товары
+                        <span class="category-count" id="count-all"></span>
+                    </button>
+                </div>
+
+                <div class="products-grid" id="products-grid" role="list" aria-label="Список товаров">
+                </div>
+
+                <div class="empty-state" id="empty-state" hidden>
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    <p>Товары не найдены</p>
+                    <button class="btn-secondary" onclick="resetFilters()">Сбросить фильтры</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section" id="about" aria-labelledby="about-title">
+            <div class="container">
+                <h2 id="about-title" class="section-title">О нас</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Наша история началась в 1890-х годах как небольшая лавка на Невском проспекте, где продавались антикварные предметы из Европы.</p>
+                        <p>За более чем век существования мы пережили революцию, гражданскую войну, советскую эпоху и время возрождения.</p>
+                        <p>Мы специализируемся на предметах XIX-XX веков — фарфоре, серебре, книгах и картинах.</p>
+                        <p>Сегодня мы — современный интернет-магазин, но сохранили дух старинной лавки.</p>
+                        <p>Каждый предмет проходит экспертизу, и мы гарантируем его подлинность.</p>
+                    </div>
+                    <div class="about-image">
+                        <img src="https://via.placeholder.com/600x400?text=Наша+история" alt="Интерьер антикварного магазина" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contacts-section" id="contacts" aria-labelledby="contacts-title">
+            <div class="container">
+                <h2 id="contacts-title" class="section-title">Контакты</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Приходите к нам</h3>
+                        <address>
+                            <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Адрес: Санкт-Петербург, Невский проспект, 123</p>
+                            <p><i class="fas fa-phone" aria-hidden="true"></i> Телефон: <a href="tel:+79046334595">+7 (904) 633-45-95</a></p>
+                            <p><i class="fas fa-envelope" aria-hidden="true"></i> Email: <a href="mailto:info@antique-shop.ru">info@antique-shop.ru</a></p>
+                            <p><i class="fas fa-clock" aria-hidden="true"></i> Режим работы: ежедневно с 10:00 до 20:00</p>
+                        </address>
+                    </div>
+                    <div class="contact-form">
+                        <h3>Напишите нам</h3>
+                        <form id="contact-form" class="contact-form-element" novalidate>
+                            <div class="form-group">
+                                <label for="contact-name">Ваше имя</label>
+                                <input type="text" id="contact-name" name="name" required autocomplete="name" placeholder="Иван Иванов">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-email">Email</label>
+                                <input type="email" id="contact-email" name="email" required autocomplete="email" placeholder="ivan@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-message">Сообщение</label>
+                                <textarea id="contact-message" name="message" rows="5" required placeholder="Ваше сообщение..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Отправить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>О компании</h3>
+                    <ul>
+                        <li><a href="#about">Наша история</a></li>
+                        <li><a href="#contacts">Контакты</a></li>
+                        <li><a href="#">Доставка и оплата</a></li>
+                        <li><a href="#">Гарантии</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Каталог</h3>
+                    <ul>
+                        <li><a href="#catalog" data-category="Посуда">Посуда</a></li>
+                        <li><a href="#catalog" data-category="Курительные">Курительные</a></li>
+                        <li><a href="#catalog" data-category="Фигурки и декор">Фигурки и декор</a></li>
+                        <li><a href="#catalog" data-category="Инструменты и приборы">Инструменты и приборы</a></li>
+                        <li><a href="#catalog" data-category="Кухня и быт">Кухня и быт</a></li>
+                        <li><a href="#catalog" data-category="Свет">Свет</a></li>
+                        <li><a href="#catalog" data-category="Техника">Техника</a></li>
+                        <li><a href="#catalog" data-category="Медицина">Медицина</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Помощь</h3>
+                    <ul>
+                        <li><a href="#">Как сделать заказ</a></li>
+                        <li><a href="#">Доставка</a></li>
+                        <li><a href="#">Возврат и обмен</a></li>
+                        <li><a href="#contacts">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Подписаться на новости</h3>
+                    <form class="newsletter-form" id="newsletter-form">
+                        <label for="newsletter-email" class="visually-hidden">Ваш email</label>
+                        <input type="email" id="newsletter-email" placeholder="Ваш email" required autocomplete="email">
+                        <button type="submit" class="btn-primary btn-small">Отправить</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Старинная Коллекция. Все права защищены.</p>
+                <p>Антиквариат и редкости XIX-XX веков</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cart-overlay" hidden></div>
+    <aside class="cart-sidebar" id="cart-sidebar" aria-label="Корзина" hidden>
+        <div class="cart-header">
+            <h2 class="cart-title">Ваша корзина</h2>
+            <button class="cart-close" id="cart-close" aria-label="Закрыть корзину">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <p class="cart-empty">Ваша корзина пуста</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span id="cart-total-sum">0 ₽</span>
+            </div>
+            <button class="btn-primary" id="checkout-btn" onclick="alert('Оформление заказа в разработке')">
+                Оформить заказ
+            </button>
+        </div>
+    </aside>
+
+    <div class="toast-container" id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
