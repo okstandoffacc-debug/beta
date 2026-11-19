@@ -23,18 +23,49 @@ const ICONS = {
 };
 
 // Загрузка данных каталога
+function loadFallbackCatalog() {
+  if (Array.isArray(window.CATALOG) && window.CATALOG.length > 0) {
+    return Promise.resolve(window.CATALOG);
+  }
+
+  return new Promise(resolve => {
+    const script = document.createElement('script');
+    script.src = new URL('./js/catalog.js', document.baseURI).href;
+    script.onload = () => {
+      if (Array.isArray(window.CATALOG) && window.CATALOG.length > 0) {
+        resolve(window.CATALOG);
+        return;
+      }
+
+      console.error('Резервный каталог пуст или имеет неверный формат');
+      resolve([]);
+    };
+    script.onerror = () => {
+      console.error('Не удалось загрузить резервный каталог');
+      resolve([]);
+    };
+    document.head.appendChild(script);
+  });
+}
+
 async function loadCatalogData() {
   try {
-    const response = await fetch('./js/catalog.json');
-    if (!response.ok) {
-      console.error('Не удалось загрузить каталог');
-      return [];
-    }
+    const response = await fetch(new URL('./js/catalog.json', document.baseURI));
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('Основной каталог пуст или имеет неверный формат');
+    }
+
     console.log('Загружено товаров:', data.length);
     return data;
   } catch (error) {
     console.error('Ошибка при загрузке каталога:', error);
+    const fallback = await loadFallbackCatalog();
+    if (fallback.length > 0) {
+      console.warn('Используется резервный каталог:', fallback.length);
+      return fallback;
+    }
     return [];
   }
 }
@@ -120,10 +151,11 @@ function renderProducts(products) {
           <button
             class="btn-favorite"
             aria-label="В избранное"
+            aria-pressed="${favorites.includes(product.id)}"
             onclick="event.stopPropagation();toggleFavorite(${product.id})"
             data-id="${product.id}"
           >
-            <i class="fa${favorites.includes(product.id) ? '+' : ''} fa-heart"
+            <i class="${favorites.includes(product.id) ? 'fa-solid' : 'fa-regular'} fa-heart"
                style="color:${favorites.includes(product.id) ? 'var(--gold-light)' : '#ffffff'}"></i>
           </button>
           <button
@@ -166,33 +198,15 @@ function renderProducts(products) {
 }
 
 // Фильтрация по поиску
-function filterProducts(searchQuery) {
-  const query = searchQuery.toLowerCase();
-
-  filteredProducts = allProducts.filter(product => {
-    const nameMatch = product.name.toLowerCase().includes(query);
-    const priceMatch = product.price.toLowerCase().includes(query);
-    return nameMatch || priceMatch || query === '';
-  });
-
-  renderProducts(filteredProducts);
-  renderCategories();
-  updateCategoryCounters();
-  updateResetButton();
+function filterProducts(value) {
+  searchQuery = String(value || '').trim().toLowerCase();
+  applyFilters();
 }
 
 // Фильтрация по категории
 function filterProductsByCategory(category) {
   currentCategory = category;
-
-  if (category === 'all') {
-    filteredProducts = allProducts;
-  } else {
-    filteredProducts = allProducts.filter(product => product.category === category);
-  }
-
-  renderProducts(filteredProducts);
-  updateCategoryButtons();
+  applyFilters();
 }
 
 // Генерация кнопок категорий из данных
@@ -238,17 +252,6 @@ function renderCategories() {
     ${buttonsHTML}
   `;
 
-  // Назначаем обработчики для новых кнопок
-  const categoryBtns = categoryFilters.querySelectorAll('.category-btn');
-  categoryBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      categoryBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const category = btn.dataset.category;
-      filterProductsByCategory(category);
-    });
-  });
 }
 
 // Обновление кнопок категорий
@@ -301,18 +304,16 @@ function setupEventListeners() {
     });
   }
 
-  // Фильтрация по категориям
-  const categoryBtns = document.querySelectorAll('.category-btn');
-  categoryBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      // Сначала сбрасываем активное состояние у всех
-      categoryBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const category = btn.dataset.category;
-      filterProductsByCategory(category);
+  // Делегируем клики, так как кнопки категорий создаются заново при рендере.
+  const categoryFilters = document.getElementById('category-filters');
+  if (categoryFilters) {
+    categoryFilters.addEventListener('click', function(e) {
+      const button = e.target.closest('.category-btn');
+      if (button && categoryFilters.contains(button)) {
+        filterProductsByCategory(button.dataset.category);
+      }
     });
-  });
+  }
 
   // Сортировка
   const sortSelect = document.getElementById('sort-select');
@@ -350,34 +351,58 @@ function setupEventListeners() {
 
 // Применение сортировки
 function applySorting() {
-  if (filteredProducts.length === 0) return;
+  applyFilters();
+}
 
-  let sorted = [...filteredProducts];
+function applyFilters() {
+  const query = searchQuery;
+  const matchingProducts = allProducts.filter(product => {
+    const categoryMatches = currentCategory === 'all' || product.category === currentCategory;
+    const searchableText = [
+      product.name,
+      product.price,
+      product.category,
+      product.description
+    ].filter(Boolean).join(' ').toLowerCase();
+    return categoryMatches && (!query || searchableText.includes(query));
+  });
 
+  const priceOf = product => {
+    const digits = String(product.price || '').replace(/\D/g, '');
+    return digits ? Number(digits) : null;
+  };
   switch (currentSort) {
     case 'price-asc':
-      sorted.sort((a, b) => {
-        const pa = parseInt(String(a.price).replace(/\D/g, ''), 10) || 0;
-        const pb = parseInt(String(b.price).replace(/\D/g, ''), 10) || 0;
-        return pa - pb;
+      matchingProducts.sort((a, b) => {
+        const priceA = priceOf(a);
+        const priceB = priceOf(b);
+        if (priceA === null) return priceB === null ? 0 : 1;
+        if (priceB === null) return -1;
+        return priceA - priceB;
       });
       break;
     case 'price-desc':
-      sorted.sort((a, b) => {
-        const pa = parseInt(String(a.price).replace(/\D/g, ''), 10) || 0;
-        const pb = parseInt(String(b.price).replace(/\D/g, ''), 10) || 0;
-        return pb - pa;
+      matchingProducts.sort((a, b) => {
+        const priceA = priceOf(a);
+        const priceB = priceOf(b);
+        if (priceA === null) return priceB === null ? 0 : 1;
+        if (priceB === null) return -1;
+        return priceB - priceA;
       });
       break;
     case 'new-first':
       // Сортировка по ID ( newest first — самые поздние добавленные )
-      sorted.sort((a, b) => b.id - a.id);
+      matchingProducts.sort((a, b) => b.id - a.id);
       break;
     default:
       // оставляем текущий порядок
   }
 
-  renderProducts(sorted);
+  filteredProducts = matchingProducts;
+  renderProducts(filteredProducts);
+  updateCategoryButtons();
+  updateCategoryCounters();
+  updateResetButton();
 }
 
 // Сброс всех фильтров
@@ -399,15 +424,7 @@ function resetAllFilters() {
     currentSort = 'default';
   }
 
-  // Сбрасываем категории
-  filteredProducts = [...allProducts];
-  renderProducts(filteredProducts);
-  updateCategoryButtons();
-  updateCategoryCounters();
-  const resetBtn = document.getElementById('reset-filters-btn');
-  if (resetBtn) {
-    resetBtn.style.display = 'none';
-  }
+  applyFilters();
 }
 
 // Добавление товара в историю просмотров
@@ -497,7 +514,7 @@ function updateFavoritesUI() {
     const heartIcon = btn.querySelector('i');
     if (heartIcon) {
       if (isFavorite) {
-        heartIcon.className = 'fa fa-heart';
+        heartIcon.className = 'fa-solid fa-heart';
         heartIcon.style.color = '#7A2E2A';
       } else {
         heartIcon.className = 'fa-regular fa-heart';
